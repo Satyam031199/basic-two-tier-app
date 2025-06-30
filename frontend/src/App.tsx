@@ -6,7 +6,7 @@ const baseUrl = "http://localhost:8000"
 function App() {
   const [data, setData] = useState("");
   useEffect(() => {
-    fetch(`${baseUrl}/`)
+    fetch(`${baseUrl}/api`)
       .then((response) => response.json())
       .then((json) => setData(json.message))
       .catch((error) => console.error("Error fetching data:", error));

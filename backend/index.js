@@ -11,7 +11,7 @@ app.use(cors({
 app.use(express.json());
 
 // Example route
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
     res.status(200).json({message: 'Hello from backend!', success: true});
 });
 
