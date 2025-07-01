@@ -4,7 +4,9 @@ import cors from 'cors';
 const app = express();
 
 // Enable CORS for frontend running on localhost:5173
-app.use(cors());
+app.use(cors({
+  origin: '*', 
+}));
 
 app.use(express.json());
 
