@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-const baseUrl = "http://localhost:8000/api"
+const baseUrl = "/api"
 function App() {
   const [data, setData] = useState("");
   useEffect(() => {
