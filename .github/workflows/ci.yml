@@ -1,0 +1,61 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build backend image
+      run: docker build -t my-backend ./backend
+
+    - name: Build frontend image with env
+      run: |
+        docker build \
+          --build-arg VITE_API_BASE_URL=/api \
+          -t my-frontend ./frontend
+
+    - name: Build nginx image
+      run: |
+        docker pull nginx:latest
+        docker run --rm -v "${PWD}/nginx/nginx.conf:/etc/nginx/nginx.conf" nginx:latest nginx -t
+
+    - name: Push images to DockerHub
+      run: |
+        docker tag my-frontend satyamchaturvedi/frontend
+        docker tag my-backend satyamchaturvedi/backend
+        docker push satyamchaturvedi/frontend
+        docker push satyamchaturvedi/backend
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Deploy to EC2 via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /home/ubuntu/my-app
+          git pull origin main
+          docker-compose down
+          docker-compose up --build -d
